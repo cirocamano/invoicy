@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoicy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: #dddbd4;
+    --border2: #c8c6be;
+    --text: #1a1917;
+    --muted: #6b6860;
+    --accent: #1a1917;
+    --accent2: #2d2b27;
+    --danger: #c0392b;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 6px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 2px 8px rgba(0,0,0,0.1), 0 8px 40px rgba(0,0,0,0.12);
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  .app { display: grid; grid-template-columns: 420px 1fr; min-height: 100vh; }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 0;
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .preview-area {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    background: var(--bg);
+  }
+
+  .sidebar-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .sidebar-header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .sidebar-header p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .section {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 24px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .field { margin-bottom: 10px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="email"],
+  textarea,
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  textarea { resize: vertical; min-height: 56px; line-height: 1.5; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .field-row3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+
+  .color-row { display: flex; gap: 8px; align-items: center; }
+  .color-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.15s;
+  }
+  .color-btn:hover { transform: scale(1.1); }
+  .color-btn.active { border-color: var(--accent); }
+  .color-custom {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    position: relative;
+  }
+  .color-custom input[type="color"] {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+  }
+  .color-custom-swatch {
+    width: 100%; height: 100%;
+    pointer-events: none;
+  }
+
+  .items-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .item-row {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px;
+    position: relative;
+  }
+
+  .item-row .remove-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px;
+    border-radius: 3px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .item-row .remove-btn:hover { color: var(--danger); background: #fde8e6; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .btn-ghost {
+    background: none;
+    border-color: var(--border2);
+    color: var(--text);
+  }
+  .btn-ghost:hover { background: var(--surface2); border-color: var(--accent); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: var(--accent2); }
+
+  .btn-danger {
+    background: none;
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+
+  .action-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .logo-upload {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    min-height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #fbfaf7 0%, #f3f1eb 100%);
+  }
+  .logo-upload:hover { border-color: var(--accent); background: var(--surface2); }
+  .logo-upload input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .logo-preview {
+    display: block;
+    width: 100%;
+    max-width: 180px;
+    max-height: 44px;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+  .logo-placeholder {
+    max-width: 210px;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+  .logo-placeholder span {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 10px;
+    border-radius: 12px;
+    background: rgba(26,25,23,0.08);
+  }
+  .logo-placeholder svg {
+    width: 28px;
+    height: 28px;
+    display: block;
+  }
+  .logo-placeholder strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .invoice-paper {
+    background: #fff;
+    width: 740px;
+    min-height: 900px;
+    box-shadow: var(--shadow-lg);
+    border-radius: 3px;
+    padding: 60px;
+    position: relative;
+    font-family: var(--sans);
+    color: #1a1917;
+  }
+
+  .inv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 48px; }
+
+  .inv-logo { max-height: 70px; max-width: 200px; object-fit: contain; }
+  .inv-logo-placeholder { font-size: 22px; font-weight: 700; color: #1a1917; letter-spacing: -0.03em; }
+
+  .inv-title-block { text-align: right; }
+  .inv-title {
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    color: #1a1917;
+    line-height: 1;
+  }
+  .inv-number {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: #6b6860;
+    margin-top: 6px;
+  }
+
+  .inv-accent-bar {
+    height: 3px;
+    margin-bottom: 36px;
+    border-radius: 2px;
+  }
+
+  .inv-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+
+  .inv-party-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6b6860;
+    margin-bottom: 8px;
+  }
+
+  .inv-party-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; color: #1a1917; }
+  .inv-party-detail { font-size: 12px; color: #6b6860; line-height: 1.7; white-space: pre-line; }
+
+  .inv-meta { display: flex; gap: 32px; margin-bottom: 40px; }
+  .inv-meta-item { }
+  .inv-meta-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #6b6860; margin-bottom: 3px; }
+  .inv-meta-value { font-family: var(--mono); font-size: 13px; color: #1a1917; }
+
+  .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+
+  .inv-table thead tr {
+    border-top: 1.5px solid;
+    border-bottom: 1.5px solid;
+  }
+
+  .inv-table th {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 0;
+    text-align: left;
+    color: #6b6860;
+  }
+
+  .inv-table th:last-child,
+  .inv-table td:last-child { text-align: right; }
+
+  .inv-table td {
+    padding: 12px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #eeedea;
+    vertical-align: top;
+    color: #1a1917;
+  }
+
+  .inv-table .td-desc { font-weight: 500; }
+  .inv-table .td-subdesc { font-size: 11px; color: #6b6860; margin-top: 2px; }
+  .inv-table .td-mono { font-family: var(--mono); font-size: 12px; }
+
+  .inv-totals { margin-left: auto; width: 260px; }
+  .inv-total-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+  .inv-total-row span:first-child { color: #6b6860; }
+  .inv-total-row span:last-child { font-family: var(--mono); font-size: 12px; }
+  .inv-total-grand {
+    display: flex; justify-content: space-between;
+    padding: 10px 0 0;
+    margin-top: 6px;
+    border-top: 1.5px solid #1a1917;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .inv-total-grand span:last-child { font-family: var(--mono); }
+
+  .inv-notes {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid #eeedea;
+  }
+  .inv-notes-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #6b6860; margin-bottom: 6px; }
+  .inv-notes-text { font-size: 12px; color: #6b6860; line-height: 1.7; white-space: pre-line; }
+
+  .inv-footer {
+    margin-top: 48px;
+    text-align: center;
+    font-size: 11px;
+    color: #aaa9a4;
+    font-family: var(--mono);
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    width: 740px;
+    justify-content: flex-end;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+  @media (max-width: 1100px) {
+    .app {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      position: static;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header {
+      position: static;
+    }
+
+    .preview-area {
+      padding: 24px 16px 40px;
+    }
+
+    .toolbar,
+    .invoice-paper {
+      width: 100%;
+      max-width: 740px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .section {
+      padding: 16px;
+    }
+
+    .field-row,
+    .field-row3 {
+      grid-template-columns: 1fr;
+    }
+
+    .action-bar,
+    .toolbar {
+      width: 100%;
+    }
+
+    .action-bar .btn,
+    .toolbar .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .preview-area {
+      align-items: stretch;
+      gap: 16px;
+      padding: 16px 12px 32px;
+    }
+
+    .invoice-paper {
+      min-height: auto;
+      padding: 28px 20px;
+    }
+
+    .inv-header {
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .inv-title-block {
+      text-align: left;
+    }
+
+    .inv-title {
+      font-size: 28px;
+    }
+
+    .inv-parties {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .inv-meta {
+      flex-wrap: wrap;
+      gap: 18px 24px;
+      margin-bottom: 32px;
+    }
+
+    .inv-table th,
+    .inv-table td {
+      font-size: 12px;
+    }
+
+    .inv-totals {
+      width: 100%;
+    }
+
+    .inv-notes,
+    .inv-footer {
+      margin-top: 32px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .sidebar-header {
+      padding: 16px;
+    }
+
+    .logo-upload {
+      min-height: 80px;
+    }
+
+    .invoice-paper {
+      padding: 22px 16px;
+    }
+
+    .inv-logo {
+      max-width: 160px;
+      max-height: 56px;
+    }
+
+    .inv-title {
+      font-size: 24px;
+    }
+
+    .inv-meta-label,
+    .inv-party-label,
+    .inv-table th {
+      letter-spacing: 0.06em;
+    }
+
+    .inv-total-grand {
+      font-size: 14px;
+    }
+  }
+
+  @media print {
+    .sidebar, .toolbar, .app { display: block !important; }
+    .sidebar, .toolbar { display: none !important; }
+    .preview-area { padding: 0; background: white; }
+    .invoice-paper { box-shadow: none; width: 100%; padding: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>Invoicy</h1>
+      <p>Crea y descarga facturas de forma rápida para clientes</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Marca</div>
+
+      <div class="field">
+        <label>Logo</label>
+        <div class="logo-upload" id="logoDropzone">
+          <input type="file" id="logoInput" accept="image/*">
+          <div id="logoPlaceholder" class="logo-placeholder">
+            <span>
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Media / Image_01"> <path id="Vector" d="M3.00005 17.0001C3 16.9355 3 16.8689 3 16.8002V7.2002C3 6.08009 3 5.51962 3.21799 5.0918C3.40973 4.71547 3.71547 4.40973 4.0918 4.21799C4.51962 4 5.08009 4 6.2002 4H17.8002C18.9203 4 19.4801 4 19.9079 4.21799C20.2842 4.40973 20.5905 4.71547 20.7822 5.0918C21 5.5192 21 6.07899 21 7.19691V16.8031C21 17.2881 21 17.6679 20.9822 17.9774M3.00005 17.0001C3.00082 17.9884 3.01337 18.5058 3.21799 18.9074C3.40973 19.2837 3.71547 19.5905 4.0918 19.7822C4.5192 20 5.07899 20 6.19691 20H17.8036C18.9215 20 19.4805 20 19.9079 19.7822C20.2842 19.5905 20.5905 19.2837 20.7822 18.9074C20.9055 18.6654 20.959 18.3813 20.9822 17.9774M3.00005 17.0001L7.76798 11.4375L7.76939 11.436C8.19227 10.9426 8.40406 10.6955 8.65527 10.6064C8.87594 10.5282 9.11686 10.53 9.33643 10.6113C9.58664 10.704 9.79506 10.9539 10.2119 11.4541L12.8831 14.6595C13.269 15.1226 13.463 15.3554 13.6986 15.4489C13.9065 15.5313 14.1357 15.5406 14.3501 15.4773C14.5942 15.4053 14.8091 15.1904 15.2388 14.7607L15.7358 14.2637C16.1733 13.8262 16.3921 13.6076 16.6397 13.5361C16.8571 13.4734 17.0896 13.4869 17.2988 13.5732C17.537 13.6716 17.7302 13.9124 18.1167 14.3955L20.9822 17.9774M20.9822 17.9774L21 17.9996M15 10C14.4477 10 14 9.55228 14 9C14 8.44772 14.4477 8 15 8C15.5523 8 16 8.44772 16 9C16 9.55228 15.5523 10 15 10Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+            </span>
+            <strong>Subí tu logo</strong>
+            PNG, JPG o SVG. Click o arrastrá el archivo acá.
+          </div>
+          <img id="logoPreview" class="logo-preview" style="display:none">
+        </div>
+        <div style="margin-top:6px; display:flex; gap:6px;">
+          <button class="btn btn-ghost" style="font-size:11px; padding:4px 10px;" onclick="clearLogo()">Quitar logo</button>
+          <div style="flex:1">
+            <input type="text" id="companyName" placeholder="Nombre de la empresa" value="Tu Empresa S.A.">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Color de acento</label>
+        <div class="color-row">
+          <button class="color-btn active" style="background:#1a1917" data-color="#1a1917" onclick="setAccent(this)"></button>
+          <button class="color-btn" style="background:#2563eb" data-color="#2563eb" onclick="setAccent(this)"></button>
+          <button class="color-btn" style="background:#7c3aed" data-color="#7c3aed" onclick="setAccent(this)"></button>
+          <button class="color-btn" style="background:#dc2626" data-color="#dc2626" onclick="setAccent(this)"></button>
+          <button class="color-btn" style="background:#16a34a" data-color="#16a34a" onclick="setAccent(this)"></button>
+          <button class="color-btn" style="background:#d97706" data-color="#d97706" onclick="setAccent(this)"></button>
+          <button class="color-btn" style="background:#0891b2" data-color="#0891b2" onclick="setAccent(this)"></button>
+          <div class="color-custom" title="Color personalizado">
+            <input type="color" id="customColor" value="#1a1917" oninput="setAccentCustom(this.value)">
+            <div class="color-custom-swatch" id="customSwatch" style="background:#e2e0d8"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">De (Emisor)</div>
+      <div class="field"><input type="text" id="fromName" placeholder="Tu nombre o razón social" value="Tu Empresa S.A."></div>
+      <div class="field"><input type="email" id="fromEmail" placeholder="email@empresa.com"></div>
+      <div class="field"><textarea id="fromAddress" placeholder="Dirección&#10;Ciudad, País&#10;CUIT / Tax ID" rows="3"></textarea></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Para (Cliente)</div>
+      <div class="field"><input type="text" id="toName" placeholder="Nombre del cliente" value="Cliente Ejemplo"></div>
+      <div class="field"><input type="email" id="toEmail" placeholder="cliente@email.com"></div>
+      <div class="field"><textarea id="toAddress" placeholder="Dirección&#10;Ciudad, País&#10;CUIT / ID" rows="3"></textarea></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Datos</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Número</label>
+          <input type="text" id="invNumber" value="0001">
+        </div>
+        <div class="field">
+          <label>Moneda</label>
+          <select id="currency">
+            <option value="$" data-code="ARS">ARS $</option>
+            <option value="USD " data-code="USD">USD $</option>
+            <option value="€" data-code="EUR">EUR €</option>
+            <option value="R$" data-code="BRL">BRL R$</option>
+            <option value="£" data-code="GBP">GBP £</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Fecha de emisión</label>
+          <input type="date" id="invDate">
+        </div>
+        <div class="field">
+          <label>Vencimiento</label>
+          <input type="date" id="invDue">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Ítems</div>
+      <div class="items-list" id="itemsList"></div>
+      <div style="margin-top:12px">
+        <button class="btn btn-ghost" onclick="addItem()">+ Agregar ítem</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Descuentos &amp; Impuestos</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Descuento %</label>
+          <input type="number" id="discount" min="0" max="100" value="0" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Impuesto %</label>
+          <input type="number" id="tax" min="0" max="100" value="0" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Notas</div>
+      <div class="field">
+        <textarea id="notes" rows="3" placeholder="Condiciones de pago, CBU, alias, instrucciones..."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Pie de página</div>
+      <div class="field">
+        <input type="text" id="footerText" placeholder="Gracias por su confianza." value="Gracias por su confianza.">
+      </div>
+    </div>
+
+    <div class="section" style="border-bottom:none">
+      <div class="action-bar">
+        <button class="btn btn-primary" onclick="downloadInvoicePdf()">⬇ Descargar PDF</button>
+        <button class="btn btn-ghost" onclick="resetAll()">Reset</button>
+      </div>
+    </div>
+  </aside>
+  <main class="preview-area">
+    <div class="toolbar">
+      <button class="btn btn-ghost" onclick="downloadInvoicePdf()">↓ Descargar PDF</button>
+    </div>
+
+    <div class="invoice-paper" id="invoicePaper">
+      <div class="inv-header">
+        <div id="invLogoArea">
+          <div class="inv-logo-placeholder" id="invCompanyName">Tu Empresa</div>
+        </div>
+        <div class="inv-title-block">
+          <div class="inv-title">INVOICE</div>
+          <div class="inv-number" id="invNumDisplay">#0001</div>
+        </div>
+      </div>
+
+      <div class="inv-accent-bar" id="accentBar" style="background:#1a1917"></div>
+
+      <div class="inv-parties">
+        <div>
+          <div class="inv-party-label">De</div>
+          <div class="inv-party-name" id="dispFromName">Tu Empresa S.A.</div>
+          <div class="inv-party-detail" id="dispFromDetail"></div>
+        </div>
+        <div>
+          <div class="inv-party-label">Para</div>
+          <div class="inv-party-name" id="dispToName">Cliente Ejemplo</div>
+          <div class="inv-party-detail" id="dispToDetail"></div>
+        </div>
+      </div>
+
+      <div class="inv-meta">
+        <div class="inv-meta-item">
+          <div class="inv-meta-label">Fecha de emisión</div>
+          <div class="inv-meta-value" id="dispDate">—</div>
+        </div>
+        <div class="inv-meta-item">
+          <div class="inv-meta-label">Vencimiento</div>
+          <div class="inv-meta-value" id="dispDue">—</div>
+        </div>
+      </div>
+
+      <table class="inv-table" id="invTable">
+        <thead>
+          <tr id="invTableHead">
+            <th style="width:50%">Descripción</th>
+            <th>Cantidad</th>
+            <th>Precio unit.</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="invTableBody"></tbody>
+      </table>
+
+      <div style="display:flex; justify-content:flex-end">
+        <div class="inv-totals">
+          <div class="inv-total-row" id="rowSubtotal">
+            <span>Subtotal</span><span id="dispSubtotal">$0.00</span>
+          </div>
+          <div class="inv-total-row" id="rowDiscount" style="display:none">
+            <span id="discountLabel">Descuento (0%)</span><span id="dispDiscount">−$0.00</span>
+          </div>
+          <div class="inv-total-row" id="rowTax" style="display:none">
+            <span id="taxLabel">Impuesto (0%)</span><span id="dispTax">$0.00</span>
+          </div>
+          <div class="inv-total-grand" id="grandTotal">
+            <span>Total</span><span id="dispTotal">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="inv-notes" id="notesBlock" style="display:none">
+        <div class="inv-notes-label">Notas</div>
+        <div class="inv-notes-text" id="dispNotes"></div>
+      </div>
+
+      <div class="inv-footer" id="dispFooter">Gracias por su confianza.</div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+let items = [];
+let logoDataUrl = null;
+let accentColor = '#1a1917';
+let itemCounter = 0;
+
+function init() {
+  const today = new Date();
+  const due = new Date(today);
+  due.setDate(today.getDate() + 30);
+  document.getElementById('invDate').value = toDateInput(today);
+  document.getElementById('invDue').value = toDateInput(due);
+  addItem();
+  bindAll();
+  render();
+}
+
+function toDateInput(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const [y,m,d] = str.split('-');
+  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${d} ${months[parseInt(m)-1]} ${y}`;
+}
+
+function bindAll() {
+  const ids = ['companyName','fromName','fromEmail','fromAddress','toName','toEmail','toAddress',
+                'invNumber','currency','invDate','invDue','discount','tax','notes','footerText'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', render);
+    if (el && el.tagName === 'SELECT') el.addEventListener('change', render);
+  });
+
+  document.getElementById('logoInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      logoDataUrl = ev.target.result;
+      document.getElementById('logoPreview').src = logoDataUrl;
+      document.getElementById('logoPreview').style.display = 'block';
+      document.getElementById('logoPlaceholder').style.display = 'none';
+      render();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function addItem() {
+  const id = ++itemCounter;
+  items.push({ id, desc: '', subdesc: '', qty: 1, price: 0 });
+  renderItems();
+}
+
+function removeItem(id) {
+  items = items.filter(i => i.id !== id);
+  renderItems();
+}
+
+function renderItems() {
+  const list = document.getElementById('itemsList');
+  list.innerHTML = '';
+  items.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'item-row';
+    div.innerHTML = `
+      <button class="remove-btn" onclick="removeItem(${item.id})" title="Eliminar">×</button>
+      <div class="field">
+        <input type="text" placeholder="Descripción del ítem" value="${esc(item.desc)}"
+          oninput="items[${idx}].desc=this.value; renderPreview()">
+      </div>
+      <div class="field">
+        <input type="text" placeholder="Detalle (opcional)" value="${esc(item.subdesc)}"
+          oninput="items[${idx}].subdesc=this.value; renderPreview()">
+      </div>
+      <div class="field-row" style="margin-top:6px">
+        <div class="field">
+          <label>Cantidad</label>
+          <input type="number" min="0" step="any" value="${item.qty}"
+            oninput="items[${idx}].qty=parseFloat(this.value)||0; renderPreview()">
+        </div>
+        <div class="field">
+          <label>Precio unit.</label>
+          <input type="number" min="0" step="any" value="${item.price}"
+            oninput="items[${idx}].price=parseFloat(this.value)||0; renderPreview()">
+        </div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+  renderPreview();
+}
+
+function esc(str) {
+  return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+function setAccent(btn) {
+  accentColor = btn.dataset.color;
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function setAccentCustom(val) {
+  accentColor = val;
+  document.getElementById('customSwatch').style.background = val;
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  render();
+}
+
+function clearLogo() {
+  logoDataUrl = null;
+  document.getElementById('logoPreview').style.display = 'none';
+  document.getElementById('logoPlaceholder').style.display = '';
+  document.getElementById('logoInput').value = '';
+  render();
+}
+
+function render() { renderPreview(); }
+
+function renderPreview() {
+  const g = id => document.getElementById(id).value;
+  const sym = (() => {
+    const sel = document.getElementById('currency');
+    return sel.value;
+  })();
+
+  const fmt = n => sym + Number(n).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  const companyName = g('companyName');
+  document.getElementById('invNumDisplay').textContent = '#' + g('invNumber').padStart(4,'0');
+
+  const logoArea = document.getElementById('invLogoArea');
+  if (logoDataUrl) {
+    logoArea.innerHTML = `<img class="inv-logo" src="${logoDataUrl}">`;
+  } else {
+    logoArea.innerHTML = `<div class="inv-logo-placeholder" id="invCompanyName">${companyName}</div>`;
+  }
+
+  document.getElementById('accentBar').style.background = accentColor;
+  document.getElementById('invTableHead').style.borderColor = accentColor;
+  document.getElementById('grandTotal').style.borderColor = accentColor;
+
+  document.getElementById('dispFromName').textContent = g('fromName') || '—';
+  const fromDetail = [g('fromEmail'), g('fromAddress')].filter(Boolean).join('\n');
+  document.getElementById('dispFromDetail').textContent = fromDetail;
+
+  document.getElementById('dispToName').textContent = g('toName') || '—';
+  const toDetail = [g('toEmail'), g('toAddress')].filter(Boolean).join('\n');
+  document.getElementById('dispToDetail').textContent = toDetail;
+
+  document.getElementById('dispDate').textContent = formatDate(g('invDate'));
+  document.getElementById('dispDue').textContent = formatDate(g('invDue'));
+
+  const tbody = document.getElementById('invTableBody');
+  tbody.innerHTML = '';
+  let subtotal = 0;
+
+  items.forEach(item => {
+    const lineTotal = item.qty * item.price;
+    subtotal += lineTotal;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="td-desc">${item.desc || '<span style="color:#ccc">Ítem sin descripción</span>'}</div>
+        ${item.subdesc ? `<div class="td-subdesc">${item.subdesc}</div>` : ''}
+      </td>
+      <td class="td-mono">${item.qty}</td>
+      <td class="td-mono">${fmt(item.price)}</td>
+      <td class="td-mono">${fmt(lineTotal)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const discPct = parseFloat(g('discount')) || 0;
+  const taxPct  = parseFloat(g('tax')) || 0;
+  const discAmt = subtotal * discPct / 100;
+  const taxAmt  = (subtotal - discAmt) * taxPct / 100;
+  const total   = subtotal - discAmt + taxAmt;
+
+  document.getElementById('dispSubtotal').textContent = fmt(subtotal);
+
+  const rowDisc = document.getElementById('rowDiscount');
+  if (discPct > 0) {
+    rowDisc.style.display = 'flex';
+    document.getElementById('discountLabel').textContent = `Descuento (${discPct}%)`;
+    document.getElementById('dispDiscount').textContent = '−' + fmt(discAmt);
+  } else rowDisc.style.display = 'none';
+
+  const rowTax = document.getElementById('rowTax');
+  if (taxPct > 0) {
+    rowTax.style.display = 'flex';
+    document.getElementById('taxLabel').textContent = `Impuesto (${taxPct}%)`;
+    document.getElementById('dispTax').textContent = fmt(taxAmt);
+  } else rowTax.style.display = 'none';
+
+  document.getElementById('dispTotal').textContent = fmt(total);
+
+  const notes = g('notes');
+  const notesBlock = document.getElementById('notesBlock');
+  if (notes.trim()) {
+    notesBlock.style.display = 'block';
+    document.getElementById('dispNotes').textContent = notes;
+  } else notesBlock.style.display = 'none';
+
+  document.getElementById('dispFooter').textContent = g('footerText');
+}
+
+async function downloadInvoicePdf() {
+  const invoice = document.getElementById('invoicePaper');
+  const invoiceNumber = document.getElementById('invNumber').value.trim() || '0001';
+  const fileName = `invoice-${invoiceNumber}.pdf`;
+  const buttons = document.querySelectorAll('button[onclick="downloadInvoicePdf()"]');
+
+  if (typeof html2pdf === 'undefined') {
+    alert('No se pudo cargar la libreria de PDF. Revisá tu conexión e intentá otra vez.');
+    return;
+  }
+
+  buttons.forEach(button => {
+    button.disabled = true;
+    button.dataset.label = button.textContent;
+    button.textContent = 'Generando PDF...';
+  });
+
+  const options = {
+    margin: 0,
+    filename: fileName,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css'] }
+  };
+
+  try {
+    await html2pdf().set(options).from(invoice).save();
+  } catch (error) {
+    console.error(error);
+    alert('No se pudo generar el PDF.');
+  } finally {
+    buttons.forEach(button => {
+      button.disabled = false;
+      button.textContent = button.dataset.label || 'Descargar PDF';
+      delete button.dataset.label;
+    });
+  }
+}
+
+function resetAll() {
+  if (!confirm('¿Resetear todo?')) return;
+  location.reload();
+}
+
+init();
+</script>
+</body>
+</html>
