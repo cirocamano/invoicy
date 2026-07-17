@@ -1,0 +1,20 @@
+{
+  "name": "invoicy",
+  "version": "1.0.0",
+  "description": "Generador de facturas simple y elegante",
+  "scripts": {
+    "dev": "node build.js --watch",
+    "build": "node build.js",
+    "lint": "eslint src/",
+    "format": "prettier --write \"src/**/*.js\" \"*.html\"",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0"
+  },
+  "dependencies": {
+    "html2pdf.js": "^0.10.2"
+  }
+}

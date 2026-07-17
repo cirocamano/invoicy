@@ -772,40 +772,6 @@
   </main>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script>(()=>{var H=0;function y(){return`item_${++H}`}function m(t,e="$"){return e+Number(t||0).toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2})}function x(t){if(!t)return"\u2014";let[e,n,a]=t.split("-");return`${a} ${["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][parseInt(n,10)-1]} ${e}`}function l(t){return t==null?"":String(t).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}function b(t){let e=new Date;return e.setDate(e.getDate()+t),e.toISOString().split("T")[0]}var o=t=>document.getElementById(t);var T={companyName:"Tu Empresa S.A.",logoDataUrl:null,accentColor:"#1a1917",fromName:"Tu Empresa S.A.",fromEmail:"",fromAddress:"",toName:"Cliente Ejemplo",toEmail:"",toAddress:"",invNumber:"0001",currency:"$",invDate:"",invDue:"",items:[],discount:0,tax:0,notes:"",footerText:"Gracias por su confianza."},f={...T},p=[];function g(){return f}function i(t){f={...f,...t},p.forEach(e=>e(f))}function h(t){return p.push(t),()=>{p=p.filter(e=>e!==t)}}function I(){i({...T,items:[]})}function w(){let t={id:y(),desc:"",subdesc:"",qty:1,price:0};return i({items:[...f.items,t]}),t.id}function F(t,e){i({items:f.items.map(n=>n.id===t?{...n,...e}:n)})}function q(t){i({items:f.items.filter(e=>e.id!==t)})}function k(){i({invDate:b(0),invDue:b(30),items:[{id:y(),desc:"",subdesc:"",qty:1,price:0}]})}async function P(){let t=o("invoicePaper"),n=`invoice-${o("invNumber")?.value.trim()||"0001"}.pdf`;if(typeof html2pdf>"u"){alert("No se pudo cargar la librer\xEDa de PDF. Revis\xE1 tu conexi\xF3n e intent\xE1 otra vez.");return}let a=document.querySelectorAll('[data-action="download-pdf"]'),s=[];a.forEach((r,u)=>{s[u]=r.textContent,r.disabled=!0,r.textContent="Generando PDF..."});let c={margin:0,filename:n,image:{type:"jpeg",quality:.98},html2canvas:{scale:2,useCORS:!0,backgroundColor:"#ffffff"},jsPDF:{unit:"pt",format:"a4",orientation:"portrait"},pagebreak:{mode:["avoid-all","css"]}};try{await html2pdf().set(c).from(t).save()}catch(r){console.error("[pdf] Generation failed:",r),alert("No se pudo generar el PDF.")}finally{a.forEach((r,u)=>{r.disabled=!1,r.textContent=s[u]})}}var D={companyName:"companyName",fromName:"fromName",fromEmail:"fromEmail",fromAddress:"fromAddress",toName:"toName",toEmail:"toEmail",toAddress:"toAddress",invNumber:"invNumber",currency:"currency",invDate:"invDate",invDue:"invDue",discount:"discount",tax:"tax",notes:"notes",footerText:"footerText"};function M(t){let e=o(t);e&&(e.addEventListener("input",()=>{i({[D[t]]:e.value})}),e.addEventListener("change",()=>{i({[D[t]]:e.value})}))}function U(){let t=o("logoInput");t&&t.addEventListener("change",e=>{let n=e.target.files[0];if(!n)return;let a=new FileReader;a.onload=s=>{i({logoDataUrl:s.target.result})},a.readAsDataURL(n)})}function R(){let t=document.querySelector('[data-action="clear-logo"]');t&&t.addEventListener("click",()=>{i({logoDataUrl:null});let e=o("logoInput");e&&(e.value="")})}function _(){document.querySelectorAll(".color-btn").forEach(e=>{e.addEventListener("click",()=>{i({accentColor:e.dataset.color})})});let t=o("customColor");t&&t.addEventListener("input",()=>{i({accentColor:t.value})})}function G(){let t=o("itemsList");if(!t)return;t.addEventListener("click",n=>{let a=n.target.closest("[data-id]");!a||!n.target.closest(".remove-btn")||q(a.dataset.id)}),t.addEventListener("input",n=>{let a=n.target,s=a.closest("[data-id]")?.dataset.id,c=a.dataset.field;if(!s||!c)return;let r=a.value;a.type==="number"&&(r=parseFloat(r)||0),F(s,{[c]:r})});let e=document.querySelector('[data-action="add-item"]');e&&e.addEventListener("click",()=>{w()})}function O(){document.querySelectorAll('[data-action="download-pdf"]').forEach(n=>{n.addEventListener("click",P)});let e=document.querySelector('[data-action="reset"]');e&&e.addEventListener("click",()=>{confirm("\xBFResetear todo?")&&I()})}function B(){Object.keys(D).forEach(M),U(),R(),_(),G(),O()}function C(){z(),J()}function z(){let t=g(),e=o("itemsList");e&&(e.innerHTML="",t.items.forEach(n=>{let a=document.createElement("div");a.className="item-row",a.innerHTML=`
-      <button class="remove-btn" data-id="${l(n.id)}" title="Eliminar">\xD7</button>
-      <div class="field">
-        <input type="text" placeholder="Descripci\xF3n del \xEDtem"
-          data-field="desc" data-id="${l(n.id)}" value="${l(n.desc)}">
-      </div>
-      <div class="field">
-        <input type="text" placeholder="Detalle (opcional)"
-          data-field="subdesc" data-id="${l(n.id)}" value="${l(n.subdesc)}">
-      </div>
-      <div class="field-row" style="margin-top:6px">
-        <div class="field">
-          <label>Cantidad</label>
-          <input type="number" min="0" step="any"
-            data-field="qty" data-id="${l(n.id)}" value="${n.qty}">
-        </div>
-        <div class="field">
-          <label>Precio unit.</label>
-          <input type="number" min="0" step="any"
-            data-field="price" data-id="${l(n.id)}" value="${n.price}">
-        </div>
-      </div>
-    `,e.appendChild(a)}))}function J(){let t=g(),e=t.currency;o("invNumDisplay").textContent="#"+String(t.invNumber).padStart(4,"0");let n=o("invLogoArea");t.logoDataUrl?n.innerHTML=`<img class="inv-logo" src="${t.logoDataUrl}" alt="Logo">`:n.innerHTML=`<div class="inv-logo-placeholder">${l(t.companyName)}</div>`,o("accentBar").style.background=t.accentColor,o("invTableHead").style.borderColor=t.accentColor,o("grandTotal").style.borderColor=t.accentColor,document.querySelectorAll(".color-btn").forEach(d=>{d.classList.toggle("active",d.dataset.color===t.accentColor)});let a=o("customSwatch");a&&(a.style.background=t.accentColor),o("dispFromName").textContent=t.fromName||"\u2014",o("dispFromDetail").textContent=[t.fromEmail,t.fromAddress].filter(Boolean).join(`
-`),o("dispToName").textContent=t.toName||"\u2014",o("dispToDetail").textContent=[t.toEmail,t.toAddress].filter(Boolean).join(`
-`),o("dispDate").textContent=x(t.invDate),o("dispDue").textContent=x(t.invDue);let s=o("invTableBody");s.innerHTML="";let c=0;t.items.forEach(d=>{let S=d.qty*d.price;c+=S;let A=document.createElement("tr");A.innerHTML=`
-      <td>
-        <div class="td-desc">${d.desc||'<span style="color:#ccc">\xCDtem sin descripci\xF3n</span>'}</div>
-        ${d.subdesc?`<div class="td-subdesc">${l(d.subdesc)}</div>`:""}
-      </td>
-      <td class="td-mono">${d.qty}</td>
-      <td class="td-mono">${m(d.price,e)}</td>
-      <td class="td-mono">${m(S,e)}</td>
-    `,s.appendChild(A)});let r=parseFloat(t.discount)||0,u=parseFloat(t.tax)||0,v=c*(r/100),E=(c-v)*(u/100),j=c-v+E;o("dispSubtotal").textContent=m(c,e);let L=o("rowDiscount");r>0?(L.style.display="flex",o("discountLabel").textContent=`Descuento (${r}%)`,o("dispDiscount").textContent="\u2212"+m(v,e)):L.style.display="none";let $=o("rowTax");u>0?($.style.display="flex",o("taxLabel").textContent=`Impuesto (${u}%)`,o("dispTax").textContent=m(E,e)):$.style.display="none",o("dispTotal").textContent=m(j,e);let N=o("notesBlock");t.notes.trim()?(N.style.display="block",o("dispNotes").textContent=t.notes):N.style.display="none",o("dispFooter").textContent=t.footerText||""}k();B();h(()=>C());C();})();
-</script>
+<!-- INJECT_SCRIPTS -->
 </body>
 </html>
